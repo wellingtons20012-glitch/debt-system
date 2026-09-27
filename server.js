@@ -624,7 +624,8 @@
                         <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
                             <button class="btn" onclick="modalNovoCliente('normal')"><i class="fa-solid fa-user-plus"></i> Novo Cliente (Normal)</button>
                             <button class="btn btn-success" onclick="modalNovoCliente('juros')"><i class="fa-solid fa-user-plus"></i> Novo Cliente (Juros)</button>
-                            <!-- BOTÃO DE SALVAR NA NUVEM MONGODB EXCLUSIVO PARA O ADMINISTRADOR -->
+                            
+                            <!-- BOTÃO DE SALVAR NA NUVEM (MONGODB ATLAS) - EXCLUSIVO PARA O ADMINISTRADOR -->
                             <button id="btn-salvar-nuvem-geral" class="btn btn-warning" onclick="salvarDadosNaNuvem()" style="display:none;"><i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem (MongoDB)</button>
                         </div>
                     </div>
@@ -728,12 +729,10 @@
                 <select id="select-escolha-chave-pix" onchange="atualizarQrCodePixAtual()"></select>
             </div>
 
-            <!-- Detalhes do Valor e Empréstimos -->
             <div id="detalhes-cobranca-pix" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 12px; text-align: left; font-size: 0.85rem;">
                 <!-- Preenchido via JavaScript -->
             </div>
 
-            <!-- QR Code Gerado via API pública gratuita -->
             <img id="img-qrcode-pix" src="" alt="QR Code Pix">
             
             <textarea id="texto-pix-copia" readonly></textarea>
@@ -760,10 +759,8 @@
     </div>
 
     <script>
-        // DATA ATUAL DO SISTEMA FIXADA EM 25/09/2026
-        const DATA_ATUAL_SISTEMA = new Date(2026, 8, 25); // Mês 8 = Setembro
+        const DATA_ATUAL_SISTEMA = new Date(2026, 8, 25);
 
-        // LISTAS DE DADOS
         const dadosIniciaisClientes = {
             "RAYANE ESPOSA DE RAFAEL": {
                 tipo: "normal",
@@ -1351,12 +1348,13 @@
             document.getElementById('sidebar').style.display = 'flex';
             document.getElementById('btn-menu-toggle').style.display = 'block';
             
+            // Exibe o botão de salvar na nuvem MongoDB para o Administrador
             document.getElementById('btn-salvar-nuvem-geral').style.display = 'inline-flex';
 
             inicializarSistemaGestor();
         }
 
-        // FUNÇÃO PARA SALVAR DIRETAMENTE NO MONGODB ATLAS
+        // FUNÇÃO PARA ENVIAR OS DADOS DIRETAMENTE PARA O BACKEND NO MONGODB ATLAS
         async function salvarDadosNaNuvem() {
             if (tipoUsuarioLogado !== 'gestor') {
                 alert("Acesso restrito ao administrador.");
