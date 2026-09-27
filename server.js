@@ -624,7 +624,7 @@
                         <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
                             <button class="btn" onclick="modalNovoCliente('normal')"><i class="fa-solid fa-user-plus"></i> Novo Cliente (Normal)</button>
                             <button class="btn btn-success" onclick="modalNovoCliente('juros')"><i class="fa-solid fa-user-plus"></i> Novo Cliente (Juros)</button>
-                            <!-- BOTÃO DE SALVAR NA NUVEM EXCLUSIVO PARA O ADMINISTRADOR -->
+                            <!-- BOTÃO DE SALVAR NA NUVEM MONGODB EXCLUSIVO PARA O ADMINISTRADOR -->
                             <button id="btn-salvar-nuvem-geral" class="btn btn-warning" onclick="salvarDadosNaNuvem()" style="display:none;"><i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem (MongoDB)</button>
                         </div>
                     </div>
@@ -636,7 +636,6 @@
                         <h2 id="titulo-cliente" onclick="registrarTresCliquesIsencao()" style="cursor: pointer;" title="Clique 3 vezes rapidamente para isentar os juros de atraso">Nome do Cliente</h2>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="acoes-gestor-container">
                             <button class="btn btn-success" onclick="modalAdicionarParcela()"><i class="fa-solid fa-plus"></i> Adicionar Linha</button>
-                            <!-- BOTÃO CRIADO PARA SALVAR E TROCAR A SENHA DO CLIENTE -->
                             <button class="btn btn-warning" onclick="salvarSenhaClienteAtual()"><i class="fa-solid fa-key"></i> Salvar / Trocar Senha</button>
                             <button class="btn btn-danger" onclick="excluirClienteAtual()"><i class="fa-solid fa-trash"></i> Excluir Cliente</button>
                         </div>
@@ -1284,12 +1283,10 @@
             }
         };
 
-        // CHAVE PIX CONFIGURADA COM A CHAVE DO FRANCISCO WELLINGTON DA S
         const chavesPixIniciais = [
             { banco: "Francisco Wellington", tipo: "Chave Aleatória", valor: "00020126330014BR.GOV.BCB.PIX0111600793733055204000053039865802BR5925FRANCISCO WELLINGTON DA S6009SAO PAULO622605224O1NoLpWhrjSbiYOPbOCN763042552" }
         ];
 
-        // Carrega ou inicializa o banco de dados garantindo senhas sequenciais para os clientes
         let dbClientes = JSON.parse(localStorage.getItem('sistema_cobranca_db'));
         if (!dbClientes) {
             dbClientes = dadosIniciaisClientes;
@@ -1304,7 +1301,7 @@
         let dbChavesPix = JSON.parse(localStorage.getItem('sistema_cobranca_pix')) || chavesPixIniciais;
 
         let clienteAtual = Object.keys(dbClientes)[0];
-        let tipoUsuarioLogado = ''; // Inicialmente vazio (exige login)
+        let tipoUsuarioLogado = '';
 
         let itemAtrasoAtualParaPix = null;
         let valorAtualPixGlobal = 0;
@@ -1313,13 +1310,11 @@
             const senhaDigitada = document.getElementById('input-senha').value.trim();
             const erroDiv = document.getElementById('login-error');
 
-            // SENHA SECRETA DO ADMINISTRADOR
             if (senhaDigitada === "SRHD..") {
                 logarComoGestor();
                 return;
             }
 
-            // Verifica se é a senha de algum cliente
             let clienteEncontrado = null;
             for (let nome in dbClientes) {
                 if (dbClientes[nome].senha === senhaDigitada) {
@@ -1356,13 +1351,12 @@
             document.getElementById('sidebar').style.display = 'flex';
             document.getElementById('btn-menu-toggle').style.display = 'block';
             
-            // Torna visível o botão de salvar na nuvem para o Administrador
             document.getElementById('btn-salvar-nuvem-geral').style.display = 'inline-flex';
 
             inicializarSistemaGestor();
         }
 
-        // FUNÇÃO QUE SALVA OS DADOS DIRETAMENTE NA NUVEM (MONGODB ATLAS)
+        // FUNÇÃO PARA SALVAR DIRETAMENTE NO MONGODB ATLAS
         async function salvarDadosNaNuvem() {
             if (tipoUsuarioLogado !== 'gestor') {
                 alert("Acesso restrito ao administrador.");
@@ -1392,7 +1386,7 @@
                 }
             } catch (erro) {
                 console.error("Erro de conexão:", erro);
-                alert("Erro de ligação ao servidor. Certifique-se de que o servidor Node.js está a correr no Termux.");
+                alert("Erro de ligação ao servidor.");
             }
         }
 
@@ -1594,7 +1588,7 @@
             let ehJuros = dados.tipo === 'juros';
 
             if (tipoUsuarioLogado === 'gestor' && ehJuros && dados.isentoAtraso) {
-                alertaIsencaoDiv.innerHTML = `<div style="background-color: #dcfce7; color: #16a34a; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem; font-weight: 600;">✨ Isenção de atraso ativa: Este cliente está pagando apenas o valor regular sem multas por dias em atraso. (Dê mais 3 cliques no nome para reativar os juros).</div>`;
+                alertaIsencaoDiv.innerHTML = `<div style="background-color: #dcfce7; color: #16a34a; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem; font-weight: 600;">✨ Isenção de atraso ativa: Este cliente está pagando apenas o valor regular sem multas por dias em atraso.</div>`;
             } else {
                 alertaIsencaoDiv.innerHTML = ``;
             }
@@ -1605,7 +1599,7 @@
                 acoesGestor.style.display = 'flex';
             }
 
-            let html = tipoUsuarioLogado === 'gestor' ? `<p style="color: #64748b; font-size: 0.9rem; margin-bottom: 15px;">💡 Dica: Você pode <strong>clicar em cima</strong> de qualquer valor, data ou descrição para editá-los diretamente. <em>Dê 3 cliques rápidos no nome do cliente acima para alternar a isenção de juros de atraso.</em> Senha atual do cliente: <strong>${dados.senha || '(Nenhuma)'}</strong></p>` : ``;
+            let html = tipoUsuarioLogado === 'gestor' ? `<p style="color: #64748b; font-size: 0.9rem; margin-bottom: 15px;">💡 Dica: Você pode <strong>clicar em cima</strong> de qualquer valor, data ou descrição para editá-los diretamente. Senha atual do cliente: <strong>${dados.senha || '(Nenhuma)'}</strong></p>` : ``;
 
             dados.tabelas.forEach((tab, indexTabela) => {
                 let totalJurosMensal = 0;
@@ -1820,7 +1814,6 @@
             });
         }
 
-        // FUNÇÃO COM BOTÃO DEDICADO PARA SALVAR E SAIR DA ALTERAÇÃO DE SENHA DO CLIENTE
         function salvarSenhaClienteAtual() {
             if (tipoUsuarioLogado !== 'gestor') return;
             if (!clienteAtual || !dbClientes[clienteAtual]) {
@@ -1935,7 +1928,6 @@
             }
         }
 
-        /* --- GERADOR DE PIX COM VALOR EXATO (BR CODE / EMV) --- */
         function crc16(str) {
             let crc = 0xFFFF;
             for (let c = 0; c < str.length; c++) {
